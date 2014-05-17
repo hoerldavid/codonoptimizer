@@ -1,4 +1,4 @@
 codonoptimizer
 ==============
 
-Simple schripts to perform codon optimization
+Simple scripts to perform codon optimization

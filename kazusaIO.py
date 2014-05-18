@@ -26,14 +26,14 @@ class KazusaHTMLParser(HTMLParser):
         '''
         return self.res
     
-def getCU(taxid):
+def getCU(taxid, codeid=1):
     '''
     get codon usage in the form:
     [codon][amino acid][relative frequency of codon] ...
     one line per codon
     '''
-    # construct URL for CU of species with given taxid
-    req = "http://www.kazusa.or.jp/codon/cgi-bin/showcodon.cgi?species="+taxid+"&aa=1"
+    # construct URL for CU of species with given taxid and genetic code
+    req = "http://www.kazusa.or.jp/codon/cgi-bin/showcodon.cgi?species="+str(taxid)+"&aa="+str(codeid)
     res = urllib.request.urlopen(req).read().decode("utf-8") # get HTML
     
     # parse HTML

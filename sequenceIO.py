@@ -14,7 +14,7 @@ def readFile(filename):
         ret = parseFASTA(c)
     # else parse raw sequence
     else:
-        ret = parseRAW(c)
+        ret = parseRaw(c)
     return ret
 
 

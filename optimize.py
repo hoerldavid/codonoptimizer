@@ -4,6 +4,8 @@ import sys
 import sequenceIO
 import kazusaIO
 import optimizing
+import seqstats
+import math
 
 import re
 
@@ -13,6 +15,7 @@ def main(argv):
     
     if (len(argv) != 4):
         print("Usage: optimize.py [sequence file] [source taxid] [target taxid]")
+        sys.exit()
     
     seqfile = argv[1]
     src_taxid = argv[2]
@@ -20,8 +23,8 @@ def main(argv):
     
     seq = sequenceIO.readFile(seqfile)
     seqr = sequenceIO.D2R(seq)
-    print("== INPUT SEQUENCE:")
-    print(seqr)
+    print("== INPUT SEQUENCE, GC: ", round(seqstats.getGC(seq)*100), "%")
+    print(seq)
     
     cuSrc = kazusaIO.getCU(src_taxid)
     cuTrg = kazusaIO.getCU(trg_taxid)
@@ -32,9 +35,13 @@ def main(argv):
     
     for c in inCodons:
         outCodons.append(opt.optimize(c))
-        
-    print("== OPTIMIZED SEQUENCE:")
-    print("".join(outCodons))
+    
+    res = "".join(outCodons)
+    resd = sequenceIO.R2D(res)
+    print("== OPTIMIZED SEQUENCE, GC: ", round(seqstats.getGC(resd)*100), "%")
+    print(resd)
+    
+    print("== STATS: CHANGED CODONS: ", seqstats.getChanged(seq, resd)[0], "/", seqstats.getChanged(seq, resd)[1])
 
 if __name__ == '__main__':
     main(sys.argv) 

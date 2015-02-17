@@ -1,0 +1,7 @@
+species codon frequencies (.spsum files) and SPSUM_LABEL
+were downloaded from ftp://ftp.kazusa.or.jp/pub/codon/current
+
+Citation:
+Codon usage tabulated from the international DNA sequence databases:
+status for the year 2000.  Nakamura, Y., Gojobori, T. and Ikemura, T.
+(2000) Nucl. Acids Res. 28, 292.

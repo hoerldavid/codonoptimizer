@@ -7,6 +7,7 @@ from CUTable import CUTable
 import re
 import SeqUtils
 import heapq
+import random
 
 class CodonOptimizer(object):
     '''
@@ -195,3 +196,88 @@ class AdaptingCodonOptimizer(CodonOptimizer):
             return usageTarget/usageSource
         else:
             return usageSource/usageTarget
+            
+class RandomTargetAdaptingCodonOptimizer(CodonOptimizer):
+    
+    def __init__(self, sourceCU, targetCU, threshold=0.0):
+        self.threshold = threshold
+        super(RandomTargetAdaptingCodonOptimizer, self).__init__(sourceCU, targetCU)
+        
+    def getCodonsForAAThresholded(self, aa):
+        '''
+        return an ordered list of (codon, usage) pairs, excluding those where usage is below threshold
+        usages are normalized by the sum, to ensure that they add up to 1
+        '''
+        codonsAndUsageTarget = self.targetCU.getCodonsForAA(aa)
+        codonsAndUsageTarget = sorted(codonsAndUsageTarget, key=lambda x:x[1])
+        
+        res = list()
+        sumUs = 0.0
+        for cd, us in codonsAndUsageTarget:
+            if us > self.threshold:
+                res.append((cd, us))
+                sumUs += us
+                
+        for cd, us in res:
+            us /= sumUs
+            
+        return res
+        
+    def getRandomOptimizedCodon(self, codon):
+        aa = self.sourceCU.getAAForCodon(codon)
+        possibleCodons = self.getCodonsForAAThresholded(aa)
+        
+        targetSum = random.random()
+        sumSoFar = 0.0
+        for co, us in possibleCodons:
+            sumSoFar += us
+            if targetSum <= sumSoFar:
+                return co
+                
+        
+    def getBestSequence(self, sourceSequence):
+        sourceCodons = re.findall('...', sourceSequence)
+        remainder = SeqUtils.getRemainderSuffix(sourceSequence)
+        
+        result = ""
+        for co in sourceCodons:
+            result += self.getRandomOptimizedCodon(co)
+            
+        result += remainder
+        return result
+        
+    def removeRestrictionSites(self, sourceSeq, optimizedSeq, restrictionSites):
+        '''
+        get the best sequence that does not contain any restriction sites
+        by re-randomizing until no restriction site remains
+        '''
+        
+        codons = re.findall('...', optimizedSeq)
+        remainder = SeqUtils.getRemainderSuffix(optimizedSeq)
+        
+        restrictionSites = SeqUtils.expandAmbiguousMult(restrictionSites)
+        restrictionLocations = SeqUtils.searchSubseqs(optimizedSeq, restrictionSites)
+        restrictionCodons = SeqUtils.getCodonsForRanges(restrictionLocations)
+        
+        # try to re-randomize a finite amount of times
+        ITERMAX = 10000
+        iteration = 0
+        
+        while iteration < ITERMAX:
+            
+            for i in restrictionCodons:
+                codons[i] = self.getRandomOptimizedCodon(codons[i])
+                
+            tSeq = "".join(codons) + remainder
+            
+            tRL = SeqUtils.searchSubseqs(tSeq, restrictionSites)
+            tRC = SeqUtils.getCodonsForRanges(tRL)
+            
+            if not tRC:
+                return tSeq
+                
+            iteration += 1
+        
+        return None
+    
+        

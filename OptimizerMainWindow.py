@@ -418,10 +418,12 @@ class OptimizerMainWindow():
 
     def actionOptimize(self, event=None):
         self.optimizer.runOptimization()
+        self.textSourceSeq.edit_modified(True)
         self.textResultSequence.edit_modified(True)
         
     def actionRemoveRestricion(self, event=None):
         self.optimizer.runRestricionRemoval()
+        self.textSourceSeq.edit_modified(True)
         self.textResultSequence.edit_modified(True)
         
     def actionSequenceModified(self, event=None):
